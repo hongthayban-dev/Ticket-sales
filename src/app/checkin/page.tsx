@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { CheckCircle2, XCircle, AlertCircle, Ticket } from 'lucide-react'
 
-export default function CheckinVerifyPage() {
+function CheckinVerifyPageContent() {
   const searchParams = useSearchParams()
   const reg_id = searchParams.get('reg_id')
 
@@ -116,5 +116,13 @@ export default function CheckinVerifyPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CheckinVerifyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-blue-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>}>
+      <CheckinVerifyPageContent />
+    </Suspense>
   )
 }

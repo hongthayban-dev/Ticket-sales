@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AdminLayout } from '@/components/admin/AdminLayout'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -12,7 +12,7 @@ import type { TicketType } from '@/types'
 
 const COLORS = ['#2563eb', '#7c3aed', '#059669', '#dc2626', '#d97706', '#0891b2', '#be185d']
 
-export default function TicketsPage() {
+function TicketsPageContent() {
   const searchParams = useSearchParams()
   const event_id = searchParams.get('event_id') || ''
   const [tickets, setTickets] = useState<TicketType[]>([])
@@ -231,5 +231,13 @@ export default function TicketsPage() {
         </div>
       </Modal>
     </AdminLayout>
+  )
+}
+
+export default function TicketsPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>}>
+      <TicketsPageContent />
+    </Suspense>
   )
 }
