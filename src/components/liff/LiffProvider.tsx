@@ -88,7 +88,7 @@ export function LiffProvider({
         setState(prev => ({
           ...prev,
           isReady: true,
-          error: `LIFF Error: ${msg}`,
+          error: `LIFF Error: ${msg} (ID: ${liffId})`,
         }))
       }
     }
