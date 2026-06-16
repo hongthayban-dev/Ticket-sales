@@ -1,17 +1,17 @@
 import { Registration, Event, TicketType } from '@/types'
 import QRCode from 'qrcode'
-import fs from 'fs'
 import path from 'path'
 
-let _fontCache: { regular: string; bold: string } | null = null
-
-function getFontBase64(): { regular: string; bold: string } {
-  if (_fontCache) return _fontCache
+function getFontUris(): { regular: string; bold: string } {
   const dir = path.join(process.cwd(), 'public', 'fonts')
-  const regular = fs.readFileSync(path.join(dir, 'Kanit-Regular.ttf')).toString('base64')
-  const bold = fs.readFileSync(path.join(dir, 'Kanit-Bold.ttf')).toString('base64')
-  _fontCache = { regular, bold }
-  return _fontCache
+  const toUri = (p: string) => {
+    const fwd = p.replace(/\\/g, '/')
+    return fwd.startsWith('/') ? `file://${fwd}` : `file:///${fwd}`
+  }
+  return {
+    regular: toUri(path.join(dir, 'Kanit-Regular.ttf')),
+    bold:    toUri(path.join(dir, 'Kanit-Bold.ttf')),
+  }
 }
 
 // ============================================================
@@ -53,7 +53,7 @@ export async function generateTicketSVG(
 
   const eventDate = formatThaiDate(event.event_date)
 
-  const fonts = getFontBase64()
+  const fonts = getFontUris()
 
   const svg = `
 <svg width="800" height="420" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -62,12 +62,12 @@ export async function generateTicketSVG(
       @font-face {
         font-family: 'Kanit';
         font-weight: 400;
-        src: url('data:font/truetype;base64,${fonts.regular}') format('truetype');
+        src: url('${fonts.regular}') format('truetype');
       }
       @font-face {
         font-family: 'Kanit';
         font-weight: 700;
-        src: url('data:font/truetype;base64,${fonts.bold}') format('truetype');
+        src: url('${fonts.bold}') format('truetype');
       }
     </style>
     <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
