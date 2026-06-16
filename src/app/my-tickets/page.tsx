@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -33,20 +33,20 @@ function MyTicketsContent() {
             className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
             <ArrowLeft className="w-5 h-5"/>
           </button>
-          <h1 className="font-bold text-lg">à¸šà¸±à¸•à¸£à¸‚à¸­à¸‡à¸‰à¸±à¸™</h1>
+          <h1 className="font-bold text-lg">บัตรของฉัน</h1>
         </div>
       </div>
 
       <div className="px-4 py-5">
-        {loading && <LoadingSpinner text="à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”..."/>}
+        {loading && <LoadingSpinner text="กำลังโหลด..."/>}
 
         {!loading && regs.length === 0 && (
           <div className="text-center py-16">
             <Ticket className="w-16 h-16 text-gray-300 mx-auto mb-4"/>
-            <h3 className="font-bold text-gray-700 mb-2">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸šà¸±à¸•à¸£</h3>
-            <p className="text-gray-500 text-sm">à¸„à¸¸à¸“à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸¥à¸‡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™à¸‡à¸²à¸™à¹ƒà¸”</p>
+            <h3 className="font-bold text-gray-700 mb-2">ยังไม่มีบัตร</h3>
+            <p className="text-gray-500 text-sm">คุณยังไม่ได้ลงทะเบียนงานใด</p>
             <button onClick={() => router.push('/')} className="btn-primary mt-4 px-6">
-              à¸”à¸¹à¸‡à¸²à¸™à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”
+              ดูงานทั้งหมด
             </button>
           </div>
         )}
@@ -70,9 +70,9 @@ function MyTicketsContent() {
                 </div>
 
                 <div className="space-y-1 text-sm text-gray-600 mb-4">
-                  <p>à¸œà¸¹à¹‰à¸¥à¸‡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™: <span className="font-medium text-gray-900">{reg.customer_name}</span></p>
-                  <p>à¸¢à¸­à¸”à¸Šà¸³à¸£à¸°: <span className="font-bold text-primary-600">{formatCurrency(reg.total_amount)}</span></p>
-                  <p>à¸¥à¸‡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™à¹€à¸¡à¸·à¹ˆà¸­: {formatDate(reg.created_at)}</p>
+                  <p>ผู้ลงทะเบียน: <span className="font-medium text-gray-900">{reg.customer_name}</span></p>
+                  <p>ยอดชำระ: <span className="font-bold text-primary-600">{formatCurrency(reg.total_amount)}</span></p>
+                  <p>ลงทะเบียนเมื่อ: {formatDate(reg.created_at)}</p>
                 </div>
 
                 {reg.payment_status === 'paid' && reg.ticket_png_url && (
@@ -84,7 +84,7 @@ function MyTicketsContent() {
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold"
                     >
                       <Ticket className="w-4 h-4"/>
-                      à¸”à¸¹à¸šà¸±à¸•à¸£
+                      ดูบัตร
                     </a>
                     {reg.ticket_pdf_url && (
                       <a
@@ -105,7 +105,7 @@ function MyTicketsContent() {
                     onClick={() => router.push(`/payment/${reg.reg_id}`)}
                     className="w-full py-2.5 rounded-xl bg-yellow-500 text-white text-sm font-semibold"
                   >
-                    à¸Šà¸³à¸£à¸°à¹€à¸‡à¸´à¸™
+                    ชำระเงิน
                   </button>
                 )}
 
@@ -114,7 +114,7 @@ function MyTicketsContent() {
                     onClick={() => router.push(`/payment/${reg.reg_id}`)}
                     className="w-full py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold"
                   >
-                    à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¸ªà¸¥à¸´à¸›à¹ƒà¸«à¸¡à¹ˆ
+                    อัปโหลดสลิปใหม่
                   </button>
                 )}
               </div>
