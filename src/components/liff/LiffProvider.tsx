@@ -84,10 +84,11 @@ export function LiffProvider({
         })
       } catch (err) {
         console.error('LIFF init error:', err)
+        const msg = err instanceof Error ? err.message : String(err)
         setState(prev => ({
           ...prev,
           isReady: true,
-          error: 'ไม่สามารถเชื่อมต่อ LINE ได้',
+          error: `LIFF Error: ${msg}`,
         }))
       }
     }
