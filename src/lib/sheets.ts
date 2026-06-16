@@ -615,7 +615,7 @@ export async function initializeSheets(): Promise<void> {
 
   // Get existing sheet names
   const meta = await sheets.spreadsheets.get({ spreadsheetId: SHEET_ID, fields: 'sheets.properties.title' })
-  const existingSheets = new Set((meta.data.sheets ?? []).map((s: { properties?: { title?: string } }) => s.properties?.title ?? ''))
+  const existingSheets = new Set((meta.data.sheets ?? []).map(s => s.properties?.title ?? ''))
 
   for (const [sheetName, headers] of Object.entries(headerMap)) {
     try {
