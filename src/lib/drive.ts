@@ -1,10 +1,10 @@
 import { google, drive_v3 } from 'googleapis'
 import { Readable } from 'stream'
 
-const FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID!
+const FOLDER_ID = (process.env.GOOGLE_DRIVE_FOLDER_ID || '').replace(/^﻿/, '')
 
 function getAuth() {
-  const b64 = process.env.GOOGLE_SERVICE_ACCOUNT_BASE64!
+  const b64 = (process.env.GOOGLE_SERVICE_ACCOUNT_BASE64 || '').replace(/^﻿/, '')
   const json = JSON.parse(Buffer.from(b64, 'base64').toString('utf-8'))
   return new google.auth.GoogleAuth({
     credentials: json,

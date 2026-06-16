@@ -61,5 +61,5 @@ export function generatePromptPayQR(promptPayId: string, amount?: number): strin
 }
 
 export function getPromptPayNumber(): string {
-  return process.env.PROMPTPAY_NUMBER || ''
+  return (process.env.PROMPTPAY_NUMBER || '').replace(/^﻿/, '')
 }

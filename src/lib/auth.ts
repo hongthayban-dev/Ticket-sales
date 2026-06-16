@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import { AuthPayload, StaffRole } from '@/types'
 import { cookies } from 'next/headers'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-change-me'
+const JWT_SECRET = (process.env.JWT_SECRET || 'fallback-secret-change-me').replace(/^﻿/, '')
 const COOKIE_NAME = 'ts_admin_token'
 
 export async function hashPassword(password: string): Promise<string> {

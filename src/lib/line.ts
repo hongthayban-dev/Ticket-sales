@@ -5,7 +5,7 @@ async function linePost(path: string, body: unknown): Promise<unknown> {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
+      'Authorization': `Bearer ${(process.env.LINE_CHANNEL_ACCESS_TOKEN || '').replace(/^﻿/, '')}`,
     },
     body: JSON.stringify(body),
   })
