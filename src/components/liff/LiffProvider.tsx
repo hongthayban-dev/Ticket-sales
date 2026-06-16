@@ -57,7 +57,8 @@ export function LiffProvider({
 
       try {
         const liff = (await import('@line/liff')).default
-        await liff.init({ liffId })
+        const cleanLiffId = liffId.replace(/^﻿/, '')
+        await liff.init({ liffId: cleanLiffId })
 
         const isLoggedIn = liff.isLoggedIn()
         const isInClient = liff.isInClient()
@@ -88,7 +89,7 @@ export function LiffProvider({
         setState(prev => ({
           ...prev,
           isReady: true,
-          error: `LIFF Error: ${msg} (ID: ${liffId})`,
+          error: 'ไม่สามารถเชื่อมต่อ LINE ได้',
         }))
       }
     }
