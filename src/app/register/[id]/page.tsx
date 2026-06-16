@@ -9,7 +9,7 @@ import { formatCurrency, formatDate, getSeatStatusColor } from '@/lib/utils'
 import { ArrowLeft, Check, AlertCircle } from 'lucide-react'
 import type { Event, TicketType, Seat } from '@/types'
 
-const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID || '2010308553-AKbYOyq3'
+const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID || '2010405513-QHMDmGF3'
 const STEPS = [
   { label: 'เลือกบัตร' },
   { label: 'กรอกข้อมูล' },

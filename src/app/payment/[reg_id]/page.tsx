@@ -10,7 +10,7 @@ import {
   Clock, Image as ImageIcon, X, QrCode
 } from 'lucide-react'
 
-const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID || '2010308553-AKbYOyq3'
+const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID || '2010405513-QHMDmGF3'
 
 interface QrData {
   qr_image: string | null

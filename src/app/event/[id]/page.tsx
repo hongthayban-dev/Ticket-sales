@@ -8,7 +8,7 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 import { CalendarDays, MapPin, Ticket, Users, ArrowLeft, CheckCircle } from 'lucide-react'
 import type { Event, TicketType } from '@/types'
 
-const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID || '2010308553-AKbYOyq3'
+const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID || '2010405513-QHMDmGF3'
 
 function EventContent() {
   const params = useParams()
