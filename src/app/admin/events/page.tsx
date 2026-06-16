@@ -226,10 +226,17 @@ export default function EventsPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Link href={`/admin/tickets?event_id=${event.event_id}`}
-                    className="flex-1 py-2 rounded-xl bg-primary-50 text-primary-700 text-sm font-semibold text-center">
-                    จัดการบัตร
-                  </Link>
+                  {event.ticket_mode === 'seat_map' ? (
+                    <Link href={`/admin/events/${event.event_id}/seat-map`}
+                      className="flex-1 py-2 rounded-xl bg-primary-50 text-primary-700 text-sm font-semibold text-center flex items-center justify-center gap-1">
+                      <QrCode className="w-3.5 h-3.5"/>ผังที่นั่ง
+                    </Link>
+                  ) : (
+                    <Link href={`/admin/tickets?event_id=${event.event_id}`}
+                      className="flex-1 py-2 rounded-xl bg-primary-50 text-primary-700 text-sm font-semibold text-center">
+                      จัดการบัตร
+                    </Link>
+                  )}
                   <button
                     onClick={() => { setForm(event); setEditing(event); setModalOpen(true) }}
                     className="py-2 px-3 rounded-xl bg-gray-100 text-gray-600"

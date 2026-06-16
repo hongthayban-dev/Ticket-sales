@@ -273,6 +273,34 @@ export async function updateSeatStatus(seat_id: string, updates: Partial<Seat>):
   ])
 }
 
+export async function deleteEventSeats(event_id: string): Promise<void> {
+  const rows = await getRows(SHEETS.SEATS)
+  if (rows.length <= 1) return
+  const remaining = rows.slice(1).filter(r => r[0] && r[1] !== event_id)
+  const sheets = await getSheetsClient()
+  await sheets.spreadsheets.values.clear({ spreadsheetId: SHEET_ID, range: `${SHEETS.SEATS}!A2:Z` })
+  if (remaining.length > 0) {
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: SHEET_ID, range: SHEETS.SEATS,
+      valueInputOption: 'RAW', requestBody: { values: remaining },
+    })
+  }
+}
+
+export async function batchCreateSeats(seats: Seat[]): Promise<void> {
+  if (seats.length === 0) return
+  const sheets = await getSheetsClient()
+  const values = seats.map(s => [
+    s.seat_id, s.event_id, s.seat_number, s.seat_zone,
+    s.seat_row, s.seat_col, s.ticket_type_id || '', s.seat_type || '',
+    s.price, s.status, '', '', '', '', s.display_label ?? s.seat_number,
+  ])
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SHEET_ID, range: SHEETS.SEATS,
+    valueInputOption: 'RAW', requestBody: { values },
+  })
+}
+
 export async function releaseExpiredSeats(): Promise<void> {
   const rows = await getRows(SHEETS.SEATS)
   const now = new Date()
