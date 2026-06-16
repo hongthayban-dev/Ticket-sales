@@ -4,10 +4,10 @@ import {
   Staff, CheckIn, Setting, AuditLog,
 } from '@/types'
 
-const SHEET_ID = process.env.GOOGLE_SHEET_ID!
+const SHEET_ID = (process.env.GOOGLE_SHEET_ID || '').replace(/^﻿/, '')
 
 function getAuth() {
-  const b64 = process.env.GOOGLE_SERVICE_ACCOUNT_BASE64!
+  const b64 = (process.env.GOOGLE_SERVICE_ACCOUNT_BASE64 || '').replace(/^﻿/, '')
   const json = JSON.parse(Buffer.from(b64, 'base64').toString('utf-8'))
   return new google.auth.GoogleAuth({
     credentials: json,

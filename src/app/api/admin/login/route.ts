@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
     // Token-based login (super admin)
     if (adminToken) {
-      const superToken = process.env.SUPER_ADMIN_TOKEN
+      const superToken = (process.env.SUPER_ADMIN_TOKEN || '').replace(/^﻿/, '')
       if (adminToken === superToken) {
         // Return super admin session
         const jwtToken = generateToken({
