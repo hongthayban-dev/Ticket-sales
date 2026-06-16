@@ -104,5 +104,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json<ApiResponse>({ success: false, error: 'เกิดข้อผิดพลาดในการอัปโหลด' }, { status: 500 })
   }
 }
-
-export const config = { api: { bodyParser: false } }
