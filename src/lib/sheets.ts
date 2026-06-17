@@ -369,6 +369,21 @@ export async function getRegistrationByLineUser(line_user_id: string, event_id?:
   return regs.filter(r => r.line_user_id === line_user_id)
 }
 
+export async function getRegistrationsByPhone(phone: string, event_id?: string): Promise<Registration[]> {
+  const normalized = phone.replace(/\D/g, '')
+  const regs = await getRegistrations(event_id)
+  return regs.filter(r => r.customer_phone?.replace(/\D/g, '').includes(normalized))
+}
+
+export async function getRegistrationsByName(name: string, event_id?: string): Promise<Registration[]> {
+  const q = name.trim().toLowerCase()
+  const regs = await getRegistrations(event_id)
+  return regs.filter(r =>
+    r.customer_name?.toLowerCase().includes(q) ||
+    r.customer_nickname?.toLowerCase().includes(q)
+  )
+}
+
 export async function createRegistration(reg: Omit<Registration, 'created_at' | 'updated_at'>): Promise<void> {
   const now = new Date().toISOString()
   await appendRow(SHEETS.REGISTRATIONS, [

@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import {
   getRegistrationById, updateRegistration,
   updateSeatStatus, createCheckIn, createAuditLog,
+  getRegistrationsByPhone, getRegistrationsByName,
 } from '@/lib/sheets'
 import { getAuthPayload, requireRole } from '@/lib/auth'
 import type { ApiResponse } from '@/types'
@@ -106,7 +107,7 @@ export async function POST(request: Request) {
   }
 }
 
-// Verify ticket without checking in
+// Verify ticket without checking in (supports ?reg_id=, ?phone=, ?name=)
 export async function GET(request: Request) {
   const payload = getAuthPayload()
   if (!payload || !requireRole('staff')(payload)) {
@@ -115,12 +116,35 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url)
   const reg_id = searchParams.get('reg_id')
-
-  if (!reg_id) {
-    return NextResponse.json<ApiResponse>({ success: false, error: 'reg_id required' }, { status: 400 })
-  }
+  const phone  = searchParams.get('phone')
+  const name   = searchParams.get('name')
 
   try {
+    // Phone / name search — returns list
+    if (phone || name) {
+      const regs = phone
+        ? await getRegistrationsByPhone(phone)
+        : await getRegistrationsByName(name!)
+
+      const list = regs.map(r => ({
+        reg_id:            r.reg_id,
+        customer_name:     r.customer_name,
+        customer_nickname: r.customer_nickname,
+        customer_phone:    r.customer_phone,
+        ticket_type:       r.ticket_type_name,
+        seat_number:       r.seat_number,
+        payment_status:    r.payment_status,
+        checkin_status:    r.checkin_status,
+        checkin_at:        r.checkin_at,
+      }))
+      return NextResponse.json<ApiResponse>({ success: true, data: { type: 'list', results: list } })
+    }
+
+    // Single reg_id lookup
+    if (!reg_id) {
+      return NextResponse.json<ApiResponse>({ success: false, error: 'reg_id, phone or name required' }, { status: 400 })
+    }
+
     const registration = await getRegistrationById(reg_id)
     if (!registration) {
       return NextResponse.json<ApiResponse>({
@@ -133,6 +157,7 @@ export async function GET(request: Request) {
     return NextResponse.json<ApiResponse>({
       success: true,
       data: {
+        type: 'single',
         reg_id: registration.reg_id,
         customer_name: registration.customer_name,
         customer_nickname: registration.customer_nickname,

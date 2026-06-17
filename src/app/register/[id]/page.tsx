@@ -208,38 +208,113 @@ function RegisterContent() {
                   ))}
                 </div>
 
-                {Object.entries(seatsByZone).map(([zone, zoneSeats]) => (
-                  <div key={zone} className="mb-6">
-                    <h4 className="font-bold text-gray-700 text-sm mb-3 flex items-center gap-2">
-                      <span className="bg-primary-100 text-primary-700 px-2 py-0.5 rounded-lg">โซน {zone}</span>
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {zoneSeats.sort((a, b) => a.seat_number.localeCompare(b.seat_number)).map(seat => {
-                        const isSelected = selectedSeat?.seat_id === seat.seat_id
-                        const isAvailable = seat.status === 'available'
-                        return (
-                          <button
-                            key={seat.seat_id}
-                            onClick={() => isAvailable && setSelectedSeat(seat)}
-                            disabled={!isAvailable}
-                            className={`
-                              w-12 h-12 rounded-xl text-white text-xs font-bold
-                              transition-all duration-150 shadow-sm
-                              ${isSelected ? 'bg-primary-800 ring-2 ring-primary-300 scale-110' : ''}
-                              ${!isSelected && isAvailable ? 'hover:scale-105 active:scale-95' : ''}
-                              ${!isAvailable ? 'cursor-not-allowed opacity-70' : ''}
-                            `}
-                            style={{
-                              backgroundColor: isSelected ? '#1e3a8a' : getSeatStatusColor(seat.status)
-                            }}
-                          >
-                            {seat.seat_number.replace(zone, '').replace('-', '')}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))}
+                {(() => {
+                  // Aisle column positions (global, from all seats)
+                  const aisleCols = new Set(
+                    seats.filter(s => s.seat_type === 'aisle').map(s => s.seat_col)
+                  )
+                  // Max column across all seats
+                  const maxCol = seats.reduce((m, s) => Math.max(m, s.seat_col || 0), 0)
+
+                  // Helper: extract numeric column from seat_number as fallback
+                  const getCol = (s: Seat) =>
+                    s.seat_col > 0 ? s.seat_col : parseInt(s.seat_number.replace(/^[A-Z]+/, '')) || 0
+
+                  // Helper: extract row letter from seat_row or seat_number
+                  const getRow = (s: Seat) =>
+                    s.seat_row || s.seat_number.match(/^([A-Z]+)/)?.[1] || '?'
+
+                  // Zones (exclude aisle zone)
+                  const displayZones = Object.entries(seatsByZone).filter(([z]) => z !== 'aisle')
+
+                  return displayZones.map(([zone, zoneSeats]) => {
+                    // Group by row (real seats only)
+                    const rowMap = zoneSeats.reduce<Record<string, Record<number, Seat>>>((acc, s) => {
+                      if (s.seat_type === 'aisle') return acc
+                      const r = getRow(s)
+                      const c = getCol(s)
+                      if (!acc[r]) acc[r] = {}
+                      acc[r][c] = s
+                      return acc
+                    }, {})
+                    const sortedRows = Object.keys(rowMap).sort()
+                    // Columns this zone actually uses (non-aisle)
+                    const usedCols = new Set(
+                      zoneSeats.filter(s => s.seat_type !== 'aisle').map(s => getCol(s))
+                    )
+                    // All column positions to render: aisle cols + used seat cols, sorted
+                    const allCols = Array.from(
+                      new Set([...Array.from(usedCols), ...Array.from(aisleCols).filter(c => c <= maxCol)])
+                    ).sort((a, b) => a - b)
+
+                    return (
+                      <div key={zone} className="mb-6">
+                        <h4 className="font-bold text-gray-700 text-sm mb-2 flex items-center gap-2">
+                          <span className="bg-primary-100 text-primary-700 px-2 py-0.5 rounded-lg">โซน {zone}</span>
+                        </h4>
+
+                        {/* Stage indicator per zone */}
+                        <div className="text-center mb-2">
+                          <span className="text-xs text-gray-400 bg-gray-100 px-3 py-0.5 rounded-full">▲ เวที</span>
+                        </div>
+
+                        <div className="overflow-x-auto pb-1">
+                          <div className="inline-flex flex-col gap-1 min-w-max">
+                            {sortedRows.map(rowLabel => (
+                              <div key={rowLabel} className="flex items-center gap-1">
+                                {/* Row label */}
+                                <span className="w-5 text-center text-xs font-bold text-gray-400 flex-shrink-0">
+                                  {rowLabel}
+                                </span>
+
+                                {/* Render all columns: seat | aisle gap | empty */}
+                                {allCols.map(col => {
+                                  const isAisleCol = aisleCols.has(col)
+                                  const seat = rowMap[rowLabel]?.[col]
+
+                                  if (isAisleCol) {
+                                    return (
+                                      <div key={col} className="w-3 flex-shrink-0 flex items-center justify-center">
+                                        <div className="w-px h-7 bg-gray-300"/>
+                                      </div>
+                                    )
+                                  }
+
+                                  if (!seat) {
+                                    // Column exists in another row but not this one
+                                    return <div key={col} className="w-10 h-10 flex-shrink-0"/>
+                                  }
+
+                                  const isSelected  = selectedSeat?.seat_id === seat.seat_id
+                                  const isAvailable = seat.status === 'available'
+                                  const label = seat.display_label ?? seat.seat_number
+
+                                  return (
+                                    <button
+                                      key={seat.seat_id}
+                                      onClick={() => isAvailable && setSelectedSeat(seat)}
+                                      disabled={!isAvailable}
+                                      className={`
+                                        w-10 h-10 rounded-lg text-white text-xs font-bold flex-shrink-0
+                                        transition-all duration-150 shadow-sm
+                                        ${isSelected ? 'ring-2 ring-white ring-offset-1 scale-110' : ''}
+                                        ${!isSelected && isAvailable ? 'hover:scale-105 active:scale-95' : ''}
+                                        ${!isAvailable ? 'cursor-not-allowed opacity-60' : ''}
+                                      `}
+                                      style={{ backgroundColor: isSelected ? '#1e3a8a' : getSeatStatusColor(seat.status) }}
+                                    >
+                                      {label}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })
+                })()}
 
                 {selectedSeat && (
                   <div className="mt-4 card p-4 bg-primary-50 border border-primary-200">
