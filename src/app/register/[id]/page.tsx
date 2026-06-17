@@ -256,11 +256,9 @@ function RegisterContent() {
                       </div>
 
                       {/* Stage — shown once at the top */}
-                      <div className="overflow-x-auto mb-1">
-                        <div className="inline-flex flex-col items-center w-full min-w-max">
-                          <div className="bg-gray-800 text-white text-xs font-bold px-8 py-1.5 rounded-xl mb-1 ml-6">
-                            STAGE / เวที
-                          </div>
+                      <div className="flex justify-center mb-3">
+                        <div className="bg-gray-800 text-white text-xs font-bold px-10 py-1.5 rounded-xl">
+                          STAGE / เวที
                         </div>
                       </div>
 
@@ -272,7 +270,8 @@ function RegisterContent() {
                         return (
                           <div key={zone} className="mb-5">
                             <div className="overflow-x-auto pb-1">
-                              <div className="inline-flex flex-col gap-1 min-w-max">
+                              <div className="flex justify-center">
+                              <div className="inline-flex flex-col gap-1">
                                 {sortedRows.map(rowLabel => {
                                   const rowSeats = rows[rowLabel]
                                   return (
@@ -313,6 +312,7 @@ function RegisterContent() {
                                     </div>
                                   )
                                 })}
+                              </div>
                               </div>
                             </div>
                           </div>
