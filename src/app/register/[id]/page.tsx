@@ -193,22 +193,15 @@ function RegisterContent() {
             {/* Seat map */}
             {event.ticket_mode === 'seat_map' && (
               <div>
-                {/* Legend */}
-                <div className="flex flex-wrap gap-3 mb-4 p-3 bg-gray-50 rounded-xl text-xs">
-                  {[
-                    { color: '#22c55e', label: 'ว่าง' },
-                    { color: '#f59e0b', label: 'จองแล้ว' },
-                    { color: '#3b82f6', label: 'ชำระแล้ว' },
-                    { color: '#1e40af', label: 'เลือก' },
-                  ].map(({ color, label }) => (
-                    <div key={label} className="flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded" style={{ backgroundColor: color }}/>
-                      <span className="text-gray-600">{label}</span>
-                    </div>
-                  ))}
-                </div>
-
                 {(() => {
+                  // Zone color palette (matches admin editor defaults)
+                  const ZONE_PALETTE = ['#ef4444','#3b82f6','#8b5cf6','#ec4899','#f97316','#10b981','#6366f1','#f59e0b']
+                  const zoneNames = Array.from(new Set(
+                    seats.filter(s => s.seat_type !== 'aisle' && s.seat_zone !== 'aisle').map(s => s.seat_zone)
+                  ))
+                  const zoneColorMap: Record<string, string> = {}
+                  zoneNames.forEach((name, i) => { zoneColorMap[name] = ZONE_PALETTE[i % ZONE_PALETTE.length] })
+
                   // Aisle column positions (global, from all seats)
                   const aisleCols = new Set(
                     seats.filter(s => s.seat_type === 'aisle').map(s => s.seat_col)
@@ -227,84 +220,112 @@ function RegisterContent() {
                   // Zones (exclude aisle zone)
                   const displayZones = Object.entries(seatsByZone).filter(([z]) => z !== 'aisle')
 
-                  return displayZones.map(([zone, zoneSeats]) => {
-                    // Group by row (real seats only)
-                    const rowMap = zoneSeats.reduce<Record<string, Record<number, Seat>>>((acc, s) => {
-                      if (s.seat_type === 'aisle') return acc
-                      const r = getRow(s)
-                      const c = getCol(s)
-                      if (!acc[r]) acc[r] = {}
-                      acc[r][c] = s
-                      return acc
-                    }, {})
-                    const sortedRows = Object.keys(rowMap).sort()
-                    // Columns this zone actually uses (non-aisle)
-                    const usedCols = new Set(
-                      zoneSeats.filter(s => s.seat_type !== 'aisle').map(s => getCol(s))
-                    )
-                    // All column positions to render: aisle cols + used seat cols, sorted
-                    const allCols = Array.from(
-                      new Set([...Array.from(usedCols), ...Array.from(aisleCols).filter(c => c <= maxCol)])
-                    ).sort((a, b) => a - b)
-
-                    return (
-                      <div key={zone} className="mb-6">
-                        <h4 className="font-bold text-gray-700 text-sm mb-2 flex items-center gap-2">
-                          <span className="bg-primary-100 text-primary-700 px-2 py-0.5 rounded-lg">โซน {zone}</span>
-                        </h4>
-
-                        {/* Stage indicator per zone */}
-                        <div className="text-center mb-2">
-                          <span className="text-xs text-gray-400 bg-gray-100 px-3 py-0.5 rounded-full">▲ เวที</span>
+                  return (
+                    <>
+                      {/* Legend: zone colors + unavailable */}
+                      <div className="flex flex-wrap gap-3 mb-4 p-3 bg-gray-50 rounded-xl text-xs">
+                        {zoneNames.map(name => (
+                          <div key={name} className="flex items-center gap-1.5">
+                            <div className="w-4 h-4 rounded" style={{ backgroundColor: zoneColorMap[name] }}/>
+                            <span className="text-gray-700 font-medium">{name} (ว่าง)</span>
+                          </div>
+                        ))}
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-4 h-4 rounded bg-gray-300"/>
+                          <span className="text-gray-500">ไม่ว่าง</span>
                         </div>
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-4 h-4 rounded bg-primary-800"/>
+                          <span className="text-gray-500">เลือกแล้ว</span>
+                        </div>
+                      </div>
 
-                        <div className="overflow-x-auto pb-1">
-                          <div className="inline-flex flex-col gap-1 min-w-max">
-                            {sortedRows.map(rowLabel => (
-                              <div key={rowLabel} className="flex items-center gap-1">
-                                {/* Row label */}
-                                <span className="w-5 text-center text-xs font-bold text-gray-400 flex-shrink-0">
-                                  {rowLabel}
-                                </span>
+                      {displayZones.map(([zone, zoneSeats]) => {
+                        const zoneColor = zoneColorMap[zone] ?? '#6b7280'
 
-                                {/* Render all columns: seat | aisle gap | empty */}
-                                {allCols.map(col => {
-                                  const isAisleCol = aisleCols.has(col)
-                                  const seat = rowMap[rowLabel]?.[col]
+                        // Group by row (real seats only)
+                        const rowMap = zoneSeats.reduce<Record<string, Record<number, Seat>>>((acc, s) => {
+                          if (s.seat_type === 'aisle') return acc
+                          const r = getRow(s)
+                          const c = getCol(s)
+                          if (!acc[r]) acc[r] = {}
+                          acc[r][c] = s
+                          return acc
+                        }, {})
+                        const sortedRows = Object.keys(rowMap).sort()
+                        // Columns this zone actually uses (non-aisle)
+                        const usedCols = new Set(
+                          zoneSeats.filter(s => s.seat_type !== 'aisle').map(s => getCol(s))
+                        )
+                        // All column positions to render: aisle cols + used seat cols, sorted
+                        const allCols = Array.from(
+                          new Set([...Array.from(usedCols), ...Array.from(aisleCols).filter(c => c <= maxCol)])
+                        ).sort((a, b) => a - b)
 
-                                  if (isAisleCol) {
-                                    return (
-                                      <div key={col} className="w-3 flex-shrink-0 flex items-center justify-center">
-                                        <div className="w-px h-7 bg-gray-300"/>
-                                      </div>
-                                    )
-                                  }
+                        return (
+                          <div key={zone} className="mb-6">
+                            <h4 className="font-bold text-gray-700 text-sm mb-2 flex items-center gap-2">
+                              <span className="px-2 py-0.5 rounded-lg text-white text-xs" style={{ backgroundColor: zoneColor }}>
+                                โซน {zone}
+                              </span>
+                            </h4>
 
-                                  if (!seat) {
-                                    // Column exists in another row but not this one
-                                    return <div key={col} className="w-10 h-10 flex-shrink-0"/>
-                                  }
+                            {/* Stage indicator */}
+                            <div className="text-center mb-2">
+                              <span className="text-xs text-gray-400 bg-gray-100 px-3 py-0.5 rounded-full">▲ เวที</span>
+                            </div>
 
-                                  const isSelected  = selectedSeat?.seat_id === seat.seat_id
-                                  const isAvailable = seat.status === 'available'
-                                  const label = seat.display_label ?? seat.seat_number
+                            <div className="overflow-x-auto pb-1">
+                              <div className="inline-flex flex-col gap-1 min-w-max">
+                                {sortedRows.map(rowLabel => (
+                                  <div key={rowLabel} className="flex items-center gap-1">
+                                    {/* Row label */}
+                                    <span className="w-5 text-center text-xs font-bold text-gray-400 flex-shrink-0">
+                                      {rowLabel}
+                                    </span>
 
-                                  return (
-                                    <button
-                                      key={seat.seat_id}
-                                      onClick={() => isAvailable && setSelectedSeat(seat)}
-                                      disabled={!isAvailable}
-                                      className={`
-                                        w-10 h-10 rounded-lg text-white text-xs font-bold flex-shrink-0
-                                        transition-all duration-150 shadow-sm
-                                        ${isSelected ? 'ring-2 ring-white ring-offset-1 scale-110' : ''}
-                                        ${!isSelected && isAvailable ? 'hover:scale-105 active:scale-95' : ''}
-                                        ${!isAvailable ? 'cursor-not-allowed opacity-60' : ''}
-                                      `}
-                                      style={{ backgroundColor: isSelected ? '#1e3a8a' : getSeatStatusColor(seat.status) }}
-                                    >
-                                      {label}
-                                    </button>
+                                    {/* Render all columns: seat | aisle gap | empty */}
+                                    {allCols.map(col => {
+                                      const isAisleCol = aisleCols.has(col)
+                                      const seat = rowMap[rowLabel]?.[col]
+
+                                      if (isAisleCol) {
+                                        return (
+                                          <div key={col} className="w-3 flex-shrink-0 flex items-center justify-center">
+                                            <div className="w-px h-7 bg-gray-300"/>
+                                          </div>
+                                        )
+                                      }
+
+                                      if (!seat) {
+                                        return <div key={col} className="w-10 h-10 flex-shrink-0"/>
+                                      }
+
+                                      const isSelected  = selectedSeat?.seat_id === seat.seat_id
+                                      const isAvailable = seat.status === 'available'
+                                      const label = seat.display_label ?? seat.seat_number
+                                      const bgColor = isSelected
+                                        ? '#1e3a8a'
+                                        : isAvailable
+                                          ? zoneColor
+                                          : '#d1d5db'
+
+                                      return (
+                                        <button
+                                          key={seat.seat_id}
+                                          onClick={() => isAvailable && setSelectedSeat(seat)}
+                                          disabled={!isAvailable}
+                                          className={`
+                                            w-10 h-10 rounded-lg text-xs font-bold flex-shrink-0
+                                            transition-all duration-150 shadow-sm
+                                            ${isSelected ? 'text-white ring-2 ring-white ring-offset-1 scale-110' : ''}
+                                            ${!isSelected && isAvailable ? 'text-white hover:scale-105 active:scale-95' : ''}
+                                            ${!isAvailable ? 'text-gray-400 cursor-not-allowed' : ''}
+                                          `}
+                                          style={{ backgroundColor: bgColor }}
+                                        >
+                                          {label}
+                                        </button>
                                   )
                                 })}
                               </div>
@@ -313,7 +334,9 @@ function RegisterContent() {
                         </div>
                       </div>
                     )
-                  })
+                  })}
+                    </>
+                  )
                 })()}
 
                 {selectedSeat && (
