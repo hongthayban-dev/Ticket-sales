@@ -255,22 +255,27 @@ function RegisterContent() {
                         </div>
                       </div>
 
+                      {/* Stage — shown once at the top */}
+                      <div className="overflow-x-auto mb-1">
+                        <div className="inline-flex flex-col items-center w-full min-w-max">
+                          <div className="bg-gray-800 text-white text-xs font-bold px-8 py-1.5 rounded-xl mb-1 ml-6">
+                            STAGE / เวที
+                          </div>
+                        </div>
+                      </div>
+
                       {zoneNames.map(zone => {
                         const zoneColor = zoneColorMap[zone]
                         const rows = byZone[zone] ?? {}
                         const sortedRows = Object.keys(rows).sort()
 
                         return (
-                          <div key={zone} className="mb-6">
+                          <div key={zone} className="mb-5">
                             <h4 className="font-bold text-gray-700 text-sm mb-2">
                               <span className="px-2 py-0.5 rounded-lg text-white text-xs" style={{ backgroundColor: zoneColor }}>
                                 โซน {zone}
                               </span>
                             </h4>
-
-                            <div className="text-center mb-2">
-                              <span className="text-xs text-gray-400 bg-gray-100 px-3 py-0.5 rounded-full">▲ เวที</span>
-                            </div>
 
                             <div className="overflow-x-auto pb-1">
                               <div className="inline-flex flex-col gap-1 min-w-max">
