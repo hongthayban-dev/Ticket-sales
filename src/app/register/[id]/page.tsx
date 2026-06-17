@@ -271,12 +271,6 @@ function RegisterContent() {
 
                         return (
                           <div key={zone} className="mb-5">
-                            <h4 className="font-bold text-gray-700 text-sm mb-2">
-                              <span className="px-2 py-0.5 rounded-lg text-white text-xs" style={{ backgroundColor: zoneColor }}>
-                                โซน {zone}
-                              </span>
-                            </h4>
-
                             <div className="overflow-x-auto pb-1">
                               <div className="inline-flex flex-col gap-1 min-w-max">
                                 {sortedRows.map(rowLabel => {
